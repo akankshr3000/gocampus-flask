@@ -7,8 +7,8 @@ from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw, ImageFont
 import io
 import segno
-
-# -----------------------------
+ 
+# ----------------------------- 
 # Constants  
 # -----------------------------
 
@@ -908,7 +908,14 @@ def export_excel():
             df.to_excel(writer, index=False, sheet_name='Students')
         output.seek(0)
         
-        return flask.send_file(output, download_name="students_report.xlsx", as_attachment=True, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        return send_file(
+    output,
+    download_name="students_report.xlsx",
+    as_attachment=True,
+    mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+
+
     except ImportError:
         flash("Pandas/XlsxWriter not installed. Cannot export.")
         return redirect(url_for('admin_dashboard'))
