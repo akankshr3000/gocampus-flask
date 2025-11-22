@@ -9,13 +9,13 @@ import io
 import segno
 
 # -----------------------------
-# Constants 
+# Constants  
 # -----------------------------
 
 # -----------------------------
 # Constants
 # -----------------------------
-DB_PATH = os.path.join(os.getcwd(), "database", "students.db")
+DB_PATH = DB_PATH = os.path.join(os.path.dirname(__file__), "students.db")
 QR_PATH = os.path.join(os.getcwd(), "static", "qrcodes")
 PHOTO_PATH = os.path.join(os.getcwd(), "static", "student_photos")
 
