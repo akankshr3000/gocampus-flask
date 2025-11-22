@@ -1,0 +1,6 @@
+Flask
+qrcode
+segno
+Pillow
+pandas
+xlsxwriter
