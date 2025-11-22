@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GoCampus | Smart Bus Fee Verification</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- tsParticles -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@3/tsparticles.bundle.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      font-family: "Inter", "Poppins", sans-serif;
+      background: #000000;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .background-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?auto=format&fit=crop&w=1920&q=80");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.5;
+      z-index: 0;
+      filter: blur(1px) brightness(0.7);
+      will-change: transform;
+    }
+
+    /* Fallback background gradient if image doesn't load */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, #1a1a2e 0%, #0f0f1e 50%, #000000 100%);
+      z-index: -1;
+    }
+
+    .background-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.5) 100%);
+      z-index: 1;
+    }
+
+    #tsparticles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: auto;
+    }
+
+    .main-content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: white;
+      padding: 2rem;
+    }
+
+    .sparkles-container {
+      position: relative;
+      width: 100%;
+      max-width: 1200px;
+      height: 40rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: clamp(8rem, 35vw, 28rem);
+      font-weight: 900;
+      text-align: center;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      letter-spacing: -0.03em;
+      position: relative;
+      z-index: 20;
+      animation: fadeInUp 1s ease-out;
+      line-height: 0.9;
+      text-shadow:
+        0 0 10px rgba(255, 255, 255, 0.8),
+        0 0 30px rgba(255, 255, 255, 0.6),
+        0 0 60px rgba(255, 255, 255, 0.4),
+        0 0 100px rgba(255, 255, 255, 0.2),
+        0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .tagline {
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+      z-index: 20;
+      animation: fadeInUp 1s ease-out 0.2s both;
+      font-weight: 500;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 255, 255, 0.1);
+    }
+
+    .gradient-lines {
+      position: absolute;
+      width: 100%;
+      max-width: 40rem;
+      height: 10rem;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 15;
+    }
+
+    .gradient-line-1 {
+      position: absolute;
+      inset-x: 20%;
+      top: 0;
+      background: linear-gradient(to right, transparent, #6366f1, transparent);
+      height: 2px;
+      width: 75%;
+      filter: blur(1px);
+    }
+
+    .gradient-line-2 {
+      position: absolute;
+      inset-x: 20%;
+      top: 0;
+      background: linear-gradient(to right, transparent, #6366f1, transparent);
+      height: 1px;
+      width: 75%;
+    }
+
+    .gradient-line-3 {
+      position: absolute;
+      inset-x: 60%;
+      top: 0;
+      background: linear-gradient(to right, transparent, #0ea5e9, transparent);
+      height: 5px;
+      width: 25%;
+      filter: blur(2px);
+    }
+
+    .gradient-line-4 {
+      position: absolute;
+      inset-x: 60%;
+      top: 0;
+      background: linear-gradient(to right, transparent, #0ea5e9, transparent);
+      height: 1px;
+      width: 25%;
+    }
+
+    .radial-mask {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse 350px 200px at top,
+          transparent 20%,
+          rgba(0, 0, 0, 0.8) 100%);
+      z-index: 16;
+      pointer-events: none;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 2rem;
+      position: relative;
+      z-index: 20;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeInUp 1s ease-out 0.4s both;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #0ea5e9 100%);
+      padding: 1rem 2.5rem;
+      border-radius: 12px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sparkles-container {
+        height: 30rem;
+      }
+
+      h1 {
+        font-size: 7rem;
+      }
+
+      .tagline {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .buttons {
+        flex-direction: column;
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+      }
+
+      .gradient-lines {
+        max-width: 90%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 5.5rem;
+      }
+
+      .sparkles-container {
+        height: 25rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Background Image -->
+  <div class="background-image"></div>
+  <div class="background-overlay"></div>
+
+  <!-- Sparkles Particles -->
+  <div id="tsparticles"></div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="sparkles-container">
+      <!-- Gradient Lines -->
+      <div class="gradient-lines">
+        <div class="gradient-line-1"></div>
+        <div class="gradient-line-2"></div>
+        <div class="gradient-line-3"></div>
+        <div class="gradient-line-4"></div>
+      </div>
+
+      <!-- Radial Gradient Mask -->
+      <div class="radial-mask"></div>
+
+      <!-- Title -->
+      <h1>GoCampus</h1>
+      <div class="tagline">Smart Bus Fee Verification System</div>
+
+      <!-- Action Buttons -->
+      <div class="buttons">
+        <a href="/admin" class="btn">Admin Login</a>
+        <a href="/verify" class="btn">Verify Fee</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Restored 'Raise an Issue' Button (Bottom Center) -->
+  <div style="position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); z-index: 10;">
+    <a href="/student_issue" style="
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50px;
+        color: #cbd5e1;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      ">
+      <span style="color: #f59e0b;">⚡</span> Raise an Issue
+    </a>
+  </div>
+
+  <!-- tsParticles Configuration -->
+  <script>
+    // Initialize particles when page loads
+    function initParticles() {
+      if (typeof tsParticles !== "undefined") {
+        tsParticles.load("tsparticles", {
+          background: {
+            color: {
+              value: "transparent",
+            },
+          },
+          fullScreen: {
+            enable: false,
+            zIndex: 1,
+          },
+          fpsLimit: 120,
+          interactivity: {
+            events: {
+              onClick: {
+                enable: true,
+                mode: "push",
+              },
+              onHover: {
+                enable: false,
+                mode: "repulse",
+              },
+              resize: true,
+            },
+            modes: {
+              push: {
+                quantity: 4,
+              },
+              repulse: {
+                distance: 200,
+                duration: 0.4,
+              },
+            },
+          },
+          particles: {
+            bounce: {
+              horizontal: {
+                value: 1,
+              },
+              vertical: {
+                value: 1,
+              },
+            },
+            collisions: {
+              enable: false,
+            },
+            color: {
+              value: "#ffffff",
+            },
+            move: {
+              angle: {
+                offset: 0,
+                value: 90,
+              },
+              direction: "none",
+              enable: true,
+              outModes: {
+                default: "out",
+              },
+              random: false,
+              speed: {
+                min: 0.1,
+                max: 1,
+              },
+            },
+            number: {
+              density: {
+                enable: true,
+                width: 400,
+                height: 400,
+              },
+              value: 1200,
+            },
+            opacity: {
+              value: {
+                min: 0.1,
+                max: 1,
+              },
+              animation: {
+                enable: true,
+                speed: 4,
+                decay: 0,
+                sync: false,
+                mode: "auto",
+                startValue: "random",
+              },
+            },
+            shape: {
+              type: "circle",
+            },
+            size: {
+              value: {
+                min: 0.4,
+                max: 1,
+              },
+            },
+          },
+          detectRetina: true,
+        });
+      } else {
+        // Retry if library not loaded yet
+        setTimeout(initParticles, 100);
+      }
+    }
+
+    // Try to initialize immediately
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initParticles);
+    } else {
+      // DOM already loaded
+      setTimeout(initParticles, 100);
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Scanner - GoCampus</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <style>
+    body {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: "Poppins", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    h2 {
+      background: linear-gradient(90deg, #6366f1, #8b5cf6, #0ea5e9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+
+    /* Scanner wrapper with dark overlay to reduce glare */
+    .scanner-wrap {
+      position: relative;
+      width: 360px;
+      max-width: 92vw;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+    }
+
+    .scanner-wrap::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.0) 35%, rgba(0, 0, 0, 0.55) 70%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    #reader {
+      width: 100%;
+      height: 270px;
+      background: #0b1220;
+    }
+
+    /* green flash when a QR is detected */
+    .flash-success {
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.9) inset, 0 0 20px rgba(34, 197, 94, 0.6);
+      animation: flash 900ms ease-out;
+    }
+
+    @keyframes flash {
+      0% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.0) inset;
+      }
+
+      10% {
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.9) inset, 0 0 25px rgba(34, 197, 94, 0.7);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.0) inset;
+      }
+    }
+
+    #result-box {
+      display: none;
+      font-size: 1rem;
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: .5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    #next-btn {
+      display: none;
+      margin-top: 1rem;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #0ea5e9 100%);
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      padding: 0.8rem 1.5rem;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    #next-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(99, 102, 241, 0.6);
+    }
+
+    a.btn-secondary {
+      margin-top: 1rem;
+    }
+
+    .tip {
+      font-size: .85rem;
+      color: #94a3b8;
+      margin-top: .5rem;
+    }
+
+    .manual-search {
+      position: relative;
+      max-width: 500px;
+      margin: 1.8rem auto 1rem;
+      text-align: left;
+    }
+
+    .manual-search label {
+      display: block;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-bottom: 0.4rem;
+    }
+
+    .manual-search input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #e2e8f0;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .manual-search input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+    }
+
+    .search-results {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      box-shadow: 0 24px 48px rgba(15, 23, 42, 0.6);
+      max-height: 240px;
+      overflow-y: auto;
+      display: none;
+      z-index: 10;
+    }
+
+    .search-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .search-item:hover {
+      background: rgba(76, 29, 149, 0.35);
+    }
+
+    .search-item .student-name {
+      font-weight: 600;
+      color: #e2e8f0;
+      display: block;
+    }
+
+    .search-item .student-meta {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      display: block;
+    }
+
+    .search-item.no-results {
+      cursor: default;
+      justify-content: center;
+      color: #94a3b8;
+    }
+
+    .duplicate-banner {
+      background: rgba(239, 68, 68, 0.18);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .multi-match {
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      text-align: left;
+    }
+
+    .multi-match ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0;
+    }
+
+    .multi-match li {
+      color: #cbd5f5;
+      font-size: 0.9rem;
+      margin-bottom: 0.35rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container text-center py-4">
+    <h2>📷 Verify Fee - QR Scanner</h2>
+    <p class="text-secondary">Scan your QR code or enter Student ID manually</p>
+
+    <div class="scanner-wrap mx-auto mb-3">
+      <div id="reader"></div>
+    </div>
+
+    <div class="controls mb-2">
+      <button id="refocus-btn" class="btn btn-sm btn-outline-light">♻️ Re-Focus Scanner</button>
+      <button id="flash-btn" class="btn btn-sm btn-outline-warning">🔦 Turn On Flashlight</button>
+    </div>
+
+    <div class="tip">Tip: Avoid reflections. Hold the QR steady in the box for ~2 seconds.</div>
+
+    <div class="manual-search">
+      <label for="manual-search-input">Manual Search (Name or Bus No.)</label>
+      <input id="manual-search-input" type="text" placeholder="Search by Name or Bus No..." autocomplete="off">
+      <div id="manual-search-results" class="search-results"></div>
+    </div>
+
+    <div id="result-box" class="alert w-50 mx-auto"></div>
+
+    <!-- ✅ Next Scan Button -->
+    <button id="next-btn" onclick="nextScan()">🔄 Next Scan</button>
+
+    <a href="/admin_dashboard" class="btn btn-secondary mt-3">← Back to Dashboard</a>
+  </div>
+
+  <script>
+    const resultBox = document.getElementById("result-box");
+    const nextBtn = document.getElementById("next-btn");
+    const readerEl = document.getElementById("reader");
+    const refocusBtn = document.getElementById("refocus-btn");
+    const flashBtn = document.getElementById("flash-btn");
+    const manualSearchInput = document.getElementById("manual-search-input");
+    const manualSearchResults = document.getElementById("manual-search-results");
+    let html5QrCode;
+    let torchOn = false;
+    let performanceMode = { active: false };
+    let searchDebounce;
+    let failureCount = 0;
+
+    const beep = new Audio("data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA/////////////////////////////8AAAACAAACcQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=");
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function resetResultBoxStyles() {
+      resultBox.className = "";
+      resultBox.style.background = "";
+      resultBox.style.border = "";
+      resultBox.style.borderRadius = "";
+      resultBox.style.padding = "";
+      resultBox.style.boxShadow = "";
+      resultBox.style.textAlign = "";
+    }
+
+    function setVerifyingState(studentId) {
+      resetResultBoxStyles();
+      resultBox.style.display = "block";
+      resultBox.className = "alert alert-info w-75 mx-auto";
+      resultBox.style.background = "rgba(59, 130, 246, 0.15)";
+      resultBox.style.border = "1px solid rgba(59, 130, 246, 0.4)";
+      resultBox.style.borderRadius = "12px";
+      resultBox.style.padding = "1rem";
+      resultBox.style.textAlign = "center";
+      resultBox.innerHTML = `<p>Verifying student ID: ${escapeHtml(studentId)}</p>`;
+      nextBtn.style.display = "none";
+    }
+
+    function renderVerificationResult(data) {
+      resetResultBoxStyles();
+      resultBox.style.display = "block";
+      const duplicate = data.status === "duplicate" || data.duplicate;
+      if (data.student_data) {
+        const student = data.student_data;
+        const isPaid = student.fee_paid === 1 || student.fee_paid === "1";
+        const palette = duplicate
+          ? { bg: "rgba(239, 68, 68, 0.12)", border: "rgba(239, 68, 68, 0.5)", shadow: "rgba(239, 68, 68, 0.35)" }
+          : isPaid
+            ? { bg: "rgba(34, 197, 94, 0.12)", border: "rgba(34, 197, 94, 0.55)", shadow: "rgba(34, 197, 94, 0.3)" }
+            : { bg: "rgba(239, 68, 68, 0.12)", border: "rgba(239, 68, 68, 0.5)", shadow: "rgba(239, 68, 68, 0.35)" };
+
+        resultBox.className = "alert w-75 mx-auto";
+        resultBox.style.background = palette.bg;
+        resultBox.style.border = `2px solid ${palette.border}`;
+        resultBox.style.borderRadius = "15px";
+        resultBox.style.padding = "1.5rem";
+        resultBox.style.boxShadow = `0 4px 20px ${palette.shadow}`;
+        resultBox.style.textAlign = "center";
+
+        // For duplicate scans, do NOT show "Access Granted"
+        const statusTitle = duplicate ? "⚠️ Duplicate Scan Detected" : (isPaid ? "✅ Access Granted" : "🚫 Access Denied");
+        const feeStatusLabel = isPaid ? "Paid" : "Unpaid";
+        const feeStatusColor = duplicate ? "#ef4444" : (isPaid ? "#22c55e" : "#ef4444");
+        const name = escapeHtml(student.name);
+        const sid = escapeHtml(student.student_id);
+        const bus = escapeHtml(student.bus_id || "N/A");
+        const branch = escapeHtml(student.branch || "N/A");
+        const semester = escapeHtml(student.semester || "N/A");
+        const formattedDate = student.transaction_date ? escapeHtml(student.transaction_date) : null;
+        const phone = escapeHtml(student.phone_display || student.parent_contact || "N/A");
+        const email = escapeHtml(student.email || "N/A");
+        const photoUrl = student.photo_url || null;
+
+        let formattedAmount = null;
+        if (student.amount_paid !== null && student.amount_paid !== undefined) {
+          const amountNumber = Number(student.amount_paid);
+          if (!Number.isNaN(amountNumber)) {
+            formattedAmount = amountNumber.toLocaleString();
+          }
+        }
+
+        let html = "";
+        if (duplicate) {
+          html += `<div class="duplicate-banner" style="background: rgba(239, 68, 68, 0.2); border: 2px solid rgba(239, 68, 68, 0.6); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; color: #fca5a5; font-weight: 600;">${escapeHtml(data.message || "⚠️ QR already scanned today. Duplicate scan not allowed.")}</div>`;
+        }
+        // Show status title (duplicates show warning, not Access Granted)
+        html += `<h4 style="margin-bottom: 1rem; color: ${feeStatusColor};">${statusTitle}</h4>`;
+        html += `
+          <div style="display: flex; gap: 1.5rem; align-items: flex-start; text-align: left; margin-bottom: 1rem;">
+            <!-- Photo Section -->
+            <div style="flex-shrink: 0;">
+                ${photoUrl
+            ? `<img src="${photoUrl}" alt="Student Photo" style="width: 120px; height: 150px; object-fit: contain; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: #000;">`
+            : ``
+          }
+            </div>
+            
+            <!-- Details Grid -->
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; flex-grow: 1;">
+                <div style="grid-column: span 2;"><strong>Name</strong><br><span style="font-size: 1.1rem;">${name}</span></div>
+                <div><strong>Student ID</strong><br>${sid}</div>
+                <div><strong>Fee Status</strong><br><span style="color: ${feeStatusColor}; font-weight: 600;">${feeStatusLabel}</span></div>
+                <div><strong>Bus No</strong><br>${bus}</div>
+                <div><strong>Branch</strong><br>${branch}</div>
+                <div><strong>Semester</strong><br>${semester}</div>
+                <div><strong>Phone</strong><br>${phone}</div>
+                <div style="grid-column: span 2;"><strong>Email</strong><br>${email}</div>
+            </div>
+          </div>
+        `;
+
+        // Only show payment details for non-duplicate scans
+        if (!duplicate) {
+          if (isPaid && formattedAmount && formattedDate) {
+            html += `
+              <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(34, 197, 94, 0.2); border-radius: 8px;">
+                <strong>Payment Details:</strong><br>
+                ₹${formattedAmount} paid on ${formattedDate}
+              </div>
+            `;
+          } else if (isPaid && formattedDate) {
+            html += `
+              <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(34, 197, 94, 0.2); border-radius: 8px;">
+                <strong>Payment Details:</strong><br>
+                Paid on ${formattedDate}
+              </div>
+            `;
+          }
+
+          if (data.message) {
+            html += `<p style="margin-top: 1.25rem; color: #cbd5f5;">${escapeHtml(data.message)}</p>`;
+          }
+        }
+
+        resultBox.innerHTML = html;
+      } else {
+        const status = data.status || "Error";
+        const alertClass = status === "Paid" ? "alert-success" : status === "Unpaid" ? "alert-danger" : "alert-warning";
+        resultBox.className = `alert w-50 mx-auto ${alertClass}`;
+        resultBox.style.padding = "1rem";
+        resultBox.style.textAlign = "center";
+        let messageHtml = `<p>${escapeHtml(data.message || "Unable to verify student.")}</p>`;
+        if (Array.isArray(data.matches) && data.matches.length) {
+          const items = data.matches
+            .map(match => `<li><strong>${escapeHtml(match.student_id)}</strong> — ${escapeHtml(match.name)} (Bus ${escapeHtml(match.bus_id || "N/A")})</li>`)
+            .join("");
+          messageHtml += `<div class="multi-match"><p style="margin:0; color:#94a3b8;">Matches found:</p><ul>${items}</ul><p style="margin-top:0.5rem; color:#94a3b8;">Please use one of the Student IDs above to verify.</p></div>`;
+        }
+        resultBox.innerHTML = messageHtml;
+      }
+
+      nextBtn.style.display = "inline-block";
+    }
+
+    function verifyStudent(studentId, source = "scan") {
+      setVerifyingState(studentId);
+      fetch("/verify_qr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student_id: studentId })
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          renderVerificationResult(data);
+        })
+        .catch((error) => {
+          console.error("Verification error:", error);
+          resetResultBoxStyles();
+          resultBox.style.display = "block";
+          resultBox.className = "alert alert-danger w-50 mx-auto";
+          resultBox.style.padding = "1rem";
+          resultBox.style.textAlign = "center";
+          resultBox.innerText = "Error verifying student. Please try again.";
+          nextBtn.style.display = "inline-block";
+        });
+    }
+
+    function stopScanner() {
+      if (!html5QrCode) return Promise.resolve();
+      try {
+        return html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => { });
+      } catch (err) {
+        return Promise.resolve();
+      }
+    }
+
+    async function startScanner() {
+      try {
+        html5QrCode = new Html5Qrcode("reader");
+        const cameras = await Html5Qrcode.getCameras();
+        if (cameras && cameras.length) {
+          const settings = performanceMode.active
+            ? { fps: 10, qrbox: 220 }
+            : { fps: 15, qrbox: 300 };
+
+          const cameraConfig = { facingMode: "environment" };
+
+          await html5QrCode.start(
+            cameraConfig,
+            {
+              ...settings,
+              aspectRatio: 1.0,
+              disableFlip: false,
+              rememberLastUsedCamera: true
+            },
+            onScanSuccess,
+            onScanFailure
+          );
+        } else {
+          resetResultBoxStyles();
+          resultBox.style.display = "block";
+          resultBox.className = "alert alert-danger w-50 mx-auto";
+          resultBox.style.padding = "1rem";
+          resultBox.textContent = "No camera found!";
+        }
+      } catch (err) {
+        console.error("Camera start error:", err);
+        resetResultBoxStyles();
+        resultBox.style.display = "block";
+        resultBox.className = "alert alert-danger w-50 mx-auto";
+        resultBox.style.padding = "1rem";
+        resultBox.textContent = "Unable to start camera. Please check permissions.";
+      }
+    }
+
+    function onScanSuccess(decodedText) {
+      try {
+        beep.currentTime = 0;
+        beep.play().catch(() => { });
+      } catch (err) { }
+      readerEl.classList.add("flash-success");
+      setTimeout(() => readerEl.classList.remove("flash-success"), 1000);
+
+      stopScanner().finally(() => {
+        verifyStudent(decodedText, "scan");
+      });
+    }
+
+    function onScanFailure(error) {
+      failureCount++;
+      if (!performanceMode.active && failureCount > 25) {
+        performanceMode.active = true;
+        restart(false);
+      }
+    }
+
+    function restart(resetPerf = true) {
+      if (resetPerf) {
+        performanceMode.active = false;
+        failureCount = 0;
+      }
+      stopScanner().finally(() => startScanner());
+    }
+
+    function nextScan() {
+      clearManualSearchResults();
+      resultBox.style.display = "none";
+      nextBtn.style.display = "none";
+      restart();
+    }
+
+    refocusBtn.addEventListener("click", () => {
+      restart(false);
+    });
+
+    flashBtn.addEventListener("click", async () => {
+      try {
+        const track = html5QrCode ? html5QrCode.getRunningTrack() : null;
+        if (!track) return;
+        const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+        if (!("torch" in capabilities)) {
+          flashBtn.innerText = "🔦 Not Supported";
+          return;
+        }
+        torchOn = !torchOn;
+        await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+        flashBtn.innerText = torchOn ? "🔦 Turn Off Flashlight" : "🔦 Turn On Flashlight";
+      } catch (e) {
+        console.warn("Torch toggle error:", e);
+        flashBtn.innerText = "🔦 Not Supported";
+      }
+    });
+
+    function clearManualSearchResults() {
+      if (!manualSearchResults) return;
+      manualSearchResults.innerHTML = "";
+      manualSearchResults.style.display = "none";
+    }
+
+    function handleManualSearchInput(e) {
+      const query = e.target.value.trim();
+      clearTimeout(searchDebounce);
+      if (query.length < 2) {
+        clearManualSearchResults();
+        return;
+      }
+      searchDebounce = setTimeout(() => performManualSearch(query), 250);
+    }
+
+    function performManualSearch(query) {
+      fetch(`/search_student?q=${encodeURIComponent(query)}`)
+        .then((response) => {
+          if (response.status === 401) {
+            clearManualSearchResults();
+            return null;
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (!data) return;
+          const results = data.results || [];
+          if (!results.length) {
+            manualSearchResults.innerHTML = `<div class="search-item no-results">No matching students</div>`;
+            manualSearchResults.style.display = "block";
+            return;
+          }
+          manualSearchResults.innerHTML = results
+            .map((student) => {
+              const name = escapeHtml(student.name);
+              const sid = escapeHtml(student.student_id);
+              const bus = escapeHtml(student.bus_id || "N/A");
+              const branch = escapeHtml(student.branch || "N/A");
+              const semester = escapeHtml(student.semester || "N/A");
+              const phone = escapeHtml(student.phone_display || student.parent_contact || "");
+              return `
+                <div class="search-item" data-student-id="${sid}">
+                  <div>
+                    <span class="student-name">${name}</span>
+                    <span class="student-meta">ID: ${sid} • Bus No: ${bus}</span>
+                    ${phone ? `<span class="student-meta">Phone: ${phone}</span>` : ""}
+                  </div>
+                  <div style="text-align: right;">
+                    <span class="student-meta">${branch}</span>
+                    <span class="student-meta">Sem ${semester}</span>
+                  </div>
+                </div>
+              `;
+            })
+            .join("");
+          manualSearchResults.style.display = "block";
+        })
+        .catch((err) => {
+          console.error("Search error:", err);
+          clearManualSearchResults();
+        });
+    }
+
+    function handleManualSelection(studentId) {
+      clearManualSearchResults();
+      if (manualSearchInput) manualSearchInput.value = "";
+      stopScanner().finally(() => {
+        verifyStudent(studentId, "manual");
+      });
+    }
+
+    if (manualSearchInput) {
+      manualSearchInput.addEventListener("input", handleManualSearchInput);
+    }
+
+    if (manualSearchResults) {
+      manualSearchResults.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const item = event.target.closest(".search-item");
+        if (!item || item.classList.contains("no-results")) return;
+        const studentId = item.getAttribute("data-student-id");
+        if (studentId) {
+          handleManualSelection(studentId);
+        }
+      });
+    }
+
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".manual-search")) {
+        clearManualSearchResults();
+      }
+    });
+
+    startScanner();
+  </script>
+</body>
+
+</html>

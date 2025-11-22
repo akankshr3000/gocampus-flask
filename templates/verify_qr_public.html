@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Fee - QR Scanner | GoCampus</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", "Poppins", sans-serif;
+      background: #000000;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .background-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?auto=format&fit=crop&w=1920&q=80");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.5;
+      z-index: 0;
+      filter: blur(1px) brightness(0.7);
+    }
+
+    .background-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.5) 100%);
+      z-index: 1;
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+      text-align: center;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+
+    #reader {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto 1.5rem;
+      border-radius: 15px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      min-height: 400px;
+    }
+
+    #reader video {
+      width: 100% !important;
+      height: auto !important;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    #reader canvas {
+      display: none;
+    }
+
+    #reader__dashboard {
+      background: rgba(30, 41, 59, 0.8) !important;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    #reader__dashboard_section_csr {
+      color: #ffffff !important;
+    }
+
+    #reader__camera_selection {
+      color: #ffffff !important;
+      background: rgba(99, 102, 241, 0.2) !important;
+      border: 1px solid rgba(99, 102, 241, 0.5) !important;
+      border-radius: 8px;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    #reader__dashboard {
+      background: rgba(30, 41, 59, 0.8) !important;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    #reader__dashboard_section_csr {
+      color: #ffffff !important;
+    }
+
+    #reader__camera_selection {
+      color: #ffffff !important;
+      background: rgba(99, 102, 241, 0.2) !important;
+      border: 1px solid rgba(99, 102, 241, 0.5) !important;
+      border-radius: 8px;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    #result-box {
+      display: none;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      margin: 1.5rem auto;
+      max-width: 100%;
+      text-align: center;
+      font-weight: 500;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .result-success {
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, 0.5);
+      color: #86efac;
+    }
+
+    .result-error {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+    }
+
+    .result-info {
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.5);
+      color: #93c5fd;
+    }
+
+    .duplicate-banner {
+      background: rgba(239, 68, 68, 0.25);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .multi-match {
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      text-align: left;
+    }
+
+    .multi-match ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0;
+    }
+
+    .multi-match li {
+      color: #cbd5f5;
+      font-size: 0.9rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .scan-again-btn {
+      width: 100%;
+      max-width: 400px;
+      margin: 1.5rem auto;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #0ea5e9 100%);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+      display: block;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .scan-again-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.6);
+    }
+
+    .scan-again-btn:active {
+      transform: translateY(0);
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+      color: #ffffff;
+    }
+
+    .manual-input {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .manual-input h3 {
+      color: #ffffff;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .input-group input {
+      flex: 1;
+      padding: 0.875rem 1.25rem;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 1rem;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .input-group input::placeholder {
+      color: #64748b;
+    }
+
+    .btn {
+      padding: 0.875rem 1.5rem;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #0ea5e9 100%);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.6);
+    }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 2rem 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      #reader {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Background -->
+  <div class="background-image"></div>
+  <div class="background-overlay"></div>
+
+  <div class="container">
+    <div class="card">
+      <h2>📷 Verify Fee - QR Scanner</h2>
+      <p class="subtitle">Scan your QR code or enter Student ID manually</p>
+
+      <div id="reader"></div>
+      <div id="result-box"></div>
+      <button id="scan-again-btn" class="scan-again-btn" style="display: none;">Scan Again</button>
+
+      <div class="manual-input">
+        <h3>Or Enter Student ID Manually</h3>
+        <form id="manual-verify-form" class="input-group">
+          <input type="text" id="manual-student-id" name="student_id" placeholder="e.g., S101" required />
+          <button type="submit" class="btn">Verify</button>
+        </form>
+      </div>
+
+      <a href="/" class="back-link">← Back to Home</a>
+    </div>
+  </div>
+
+  <script>
+    let html5QrcodeScanner = null;
+    let isScanning = false;
+
+    function escapeHtml(value) {
+      if (value === null || value === undefined) return '';
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function renderVerificationCard(resultBox, data) {
+      if (data.student_data) {
+        const student = data.student_data;
+        const isDuplicate = data.status === "duplicate" || data.duplicate;
+        const isPaid = student.fee_paid === 1 || student.fee_paid === "1";
+
+        const cardBackground = isDuplicate
+          ? "rgba(239, 68, 68, 0.18)"
+          : isPaid
+            ? "rgba(34, 197, 94, 0.12)"
+            : "rgba(239, 68, 68, 0.12)";
+        const borderColor = isDuplicate
+          ? "rgba(239, 68, 68, 0.5)"
+          : isPaid
+            ? "rgba(34, 197, 94, 0.5)"
+            : "rgba(239, 68, 68, 0.5)";
+        const boxShadow = isDuplicate
+          ? "0 4px 20px rgba(239, 68, 68, 0.3)"
+          : isPaid
+            ? "0 4px 20px rgba(34, 197, 94, 0.3)"
+            : "0 4px 20px rgba(239, 68, 68, 0.3)";
+        // For duplicate scans, do NOT show "Access Granted"
+        const statusTitle = isDuplicate ? "⚠️ Duplicate Scan Detected" : (isPaid ? "✅ Access Granted" : "🚫 Access Denied");
+        const feeStatusLabel = isPaid ? "Paid" : "Unpaid";
+        const feeStatusColor = isDuplicate ? "#ef4444" : (isPaid ? "#22c55e" : "#ef4444");
+
+        resultBox.className = isDuplicate ? "result-error" : isPaid ? "result-success" : "result-error";
+        resultBox.style.textAlign = "center";
+        resultBox.style.padding = "1.5rem";
+        resultBox.style.borderRadius = "15px";
+        resultBox.style.background = cardBackground;
+        resultBox.style.border = `2px solid ${borderColor}`;
+        resultBox.style.boxShadow = boxShadow;
+        resultBox.style.color = "#e2e8f0";
+
+        const name = escapeHtml(student.name);
+        const sid = escapeHtml(student.student_id);
+        const bus = escapeHtml(student.bus_id || "N/A");
+        const branch = escapeHtml(student.branch || "N/A");
+        const semester = escapeHtml(student.semester || "N/A");
+        const phone = escapeHtml(student.phone_display || student.parent_contact || "N/A");
+        const formattedDate = student.transaction_date ? escapeHtml(student.transaction_date) : null;
+
+        let formattedAmount = null;
+        if (student.amount_paid !== null && student.amount_paid !== undefined) {
+          const amountNumber = Number(student.amount_paid);
+          if (!Number.isNaN(amountNumber)) {
+            formattedAmount = amountNumber.toLocaleString();
+          }
+        }
+
+        let html = '';
+        if (isDuplicate) {
+          html += `<div class="duplicate-banner" style="background: rgba(239, 68, 68, 0.2); border: 2px solid rgba(239, 68, 68, 0.6); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; color: #fca5a5; font-weight: 600;">${escapeHtml(data.message || "⚠️ QR already scanned today. Duplicate scan not allowed.")}</div>`;
+        }
+        html += `
+          <h4 style="margin-bottom: 1rem; text-align: center; font-size: 1.2rem; color: ${feeStatusColor};">
+            ${statusTitle}
+          </h4>
+          <div style="display: flex; gap: 1.5rem; align-items: flex-start; text-align: left; margin-bottom: 1rem;">
+            <!-- Photo Section -->
+            <div style="flex-shrink: 0;">
+                ${student.photo_url
+            ? `<img src="${student.photo_url}" alt="Student Photo" style="width: 120px; height: 150px; object-fit: contain; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: #000;">`
+            : ``
+          }
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; flex-grow: 1;">
+              <div><span style="font-weight:600;color:#e2e8f0">Name</span><br><span style="font-weight:500;color:#ffffff">${name}</span></div>
+              <div><span style="font-weight:600;color:#e2e8f0">Student ID</span><br><span style="font-weight:500;color:#ffffff">${sid}</span></div>
+              <div><span style="font-weight:600;color:#e2e8f0">Phone</span><br><span style="font-weight:500;color:#ffffff">${phone}</span></div>
+              <div><span style="font-weight:600;color:#e2e8f0">Fee Status</span><br><span style="font-weight:600; color: ${feeStatusColor};">${feeStatusLabel}</span></div>
+              <div><span style="font-weight:600;color:#e2e8f0">Bus No</span><br><span style="font-weight:500;color:#ffffff">${bus}</span></div>
+              <div><span style="font-weight:600;color:#e2e8f0">Branch</span><br><span style="font-weight:500;color:#ffffff">${branch}</span></div>
+              <div><span style="font-weight:600;color:#e2e8f0">Semester</span><br><span style="font-weight:500;color:#ffffff">${semester}</span></div>
+            </div>
+          </div>
+        `;
+
+        // Only show payment details for non-duplicate scans
+        if (!isDuplicate) {
+          if (isPaid && formattedAmount && formattedDate) {
+            html += `
+              <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(34, 197, 94, 0.2); border-radius: 8px; text-align: center;">
+                <strong>Payment Details:</strong><br>
+                ₹${formattedAmount} paid on ${formattedDate}
+              </div>
+            `;
+          } else if (isPaid && formattedDate) {
+            html += `
+              <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(34, 197, 94, 0.2); border-radius: 8px; text-align: center;">
+                <strong>Payment Details:</strong><br>
+                Paid on ${formattedDate}
+              </div>
+            `;
+          }
+
+          if (data.message) {
+            html += `<p style="margin-top: 1.2rem; color: #cbd5f5;">${escapeHtml(data.message)}</p>`;
+          }
+        }
+
+        resultBox.innerHTML = html;
+      } else {
+        const status = data.status || "Error";
+        resultBox.className = status === "Paid" ? "result-success" : status === "Unpaid" ? "result-error" : "result-error";
+        resultBox.style.textAlign = "center";
+        resultBox.style.padding = "1.2rem";
+        resultBox.style.borderRadius = "12px";
+        resultBox.style.background = "";
+        resultBox.style.border = "";
+        resultBox.style.boxShadow = "0 4px 20px rgba(239, 68, 68, 0.3)";
+        resultBox.style.color = "";
+        let messageHtml = `<p>${escapeHtml(data.message || "Student not found.")}</p>`;
+        if (Array.isArray(data.matches) && data.matches.length) {
+          const items = data.matches
+            .map(match => `<li><strong>${escapeHtml(match.student_id)}</strong> — ${escapeHtml(match.name)} (Bus ${escapeHtml(match.bus_id || "N/A")})</li>`)
+            .join("");
+          messageHtml += `<div class="multi-match"><p style="margin:0; color:#94a3b8;">Matches found:</p><ul>${items}</ul><p style="margin-top:0.5rem; color:#94a3b8;">Please use one of the Student IDs above to verify.</p></div>`;
+        }
+        resultBox.innerHTML = messageHtml;
+      }
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+      if (isScanning) return; // Prevent multiple scans
+      isScanning = true;
+
+      console.log("QR Code scanned:", decodedText); // Debug log
+
+      const resultBox = document.getElementById("result-box");
+      resultBox.style.display = "block";
+      resultBox.className = "result-info";
+      resultBox.innerText = "Verifying student ID: " + decodedText;
+
+      // Stop scanner immediately after successful scan for faster processing
+      if (html5QrcodeScanner) {
+        html5QrcodeScanner.clear().catch(err => console.error("Error clearing scanner:", err));
+      }
+
+      // Send scanned ID to Flask backend
+      fetch("/verify_qr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student_id: decodedText })
+      })
+        .then(response => response.json())
+        .then(data => {
+          renderVerificationCard(resultBox, data);
+
+          isScanning = false;
+
+          // Show "Scan Again" button
+          const scanAgainBtn = document.getElementById("scan-again-btn");
+          if (scanAgainBtn) {
+            scanAgainBtn.style.display = "block";
+          }
+        })
+        .catch(err => {
+          console.error("Verification error:", err);
+          resultBox.className = "result-error";
+          resultBox.innerText = "Error verifying QR! Please try again.";
+          isScanning = false;
+
+          // Show "Scan Again" button even on error
+          const scanAgainBtn = document.getElementById("scan-again-btn");
+          if (scanAgainBtn) {
+            scanAgainBtn.style.display = "block";
+          }
+        });
+    }
+
+    function onScanFailure(error) {
+      // Ignore most errors, but log for debugging
+      // console.log("Scan error (usually fine):", error);
+    }
+
+    // Initialize QR Scanner with optimized configuration for speed
+    function initScanner() {
+      const config = {
+        fps: 30, // Maximum FPS for fastest recognition
+        qrbox: function (viewfinderWidth, viewfinderHeight) {
+          // Use maximum scanning area for faster detection
+          let minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+          let qrboxSize = Math.floor(minEdge * 0.98); // Use 98% for maximum coverage
+          return {
+            width: qrboxSize,
+            height: qrboxSize
+          };
+        },
+        aspectRatio: 1.0,
+        disableFlip: false, // Allow rotation
+        rememberLastUsedCamera: true
+      };
+
+      try {
+        html5QrcodeScanner = new Html5QrcodeScanner(
+          "reader",
+          config,
+          /* verbose= */ false
+        );
+
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+      } catch (error) {
+        console.error("Error initializing scanner:", error);
+        const resultBox = document.getElementById("result-box");
+        resultBox.style.display = "block";
+        resultBox.className = "result-error";
+        resultBox.innerText = "Error initializing camera. Please check permissions and try again.";
+      }
+    }
+
+    // Function to restart scanner
+    function restartScanner() {
+      // Clear existing scanner
+      if (html5QrcodeScanner) {
+        html5QrcodeScanner.clear().catch(err => console.error("Error clearing scanner:", err));
+      }
+
+      // Clear result box and hide scan again button
+      const resultBox = document.getElementById("result-box");
+      const scanAgainBtn = document.getElementById("scan-again-btn");
+      if (resultBox) {
+        resultBox.style.display = "none";
+      }
+      if (scanAgainBtn) {
+        scanAgainBtn.style.display = "none";
+      }
+
+      // Reset scanning flag
+      isScanning = false;
+
+      // Reinitialize scanner
+      setTimeout(initScanner, 100);
+    }
+
+    // Initialize when page loads
+    document.addEventListener("DOMContentLoaded", function () {
+      // Small delay to ensure library is loaded
+      setTimeout(initScanner, 100);
+
+      // Add click handler for "Scan Again" button
+      const scanAgainBtn = document.getElementById("scan-again-btn");
+      if (scanAgainBtn) {
+        scanAgainBtn.addEventListener("click", restartScanner);
+      }
+    });
+
+
+    // Handle manual form submission
+    const manualForm = document.getElementById("manual-verify-form");
+    if (manualForm) {
+      manualForm.addEventListener("submit", function (e) {
+        e.preventDefault(); // Prevent form submission
+
+        const studentId = document.getElementById("manual-student-id").value.trim();
+        if (!studentId) {
+          return;
+        }
+
+        const resultBox = document.getElementById("result-box");
+        resultBox.style.display = "block";
+        resultBox.className = "result-info";
+        resultBox.innerText = "Verifying student ID: " + studentId;
+
+        // Send student ID to Flask backend
+        fetch("/verify_qr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ student_id: studentId })
+        })
+          .then(response => response.json())
+          .then(data => {
+            renderVerificationCard(resultBox, data);
+
+            // Show "Scan Again" button after manual verification
+            const scanAgainBtn = document.getElementById("scan-again-btn");
+            if (scanAgainBtn) {
+              scanAgainBtn.style.display = "block";
+            }
+          })
+          .catch(err => {
+            console.error("Verification error:", err);
+            resultBox.className = "result-error";
+            resultBox.innerText = "Error verifying student ID! Please try again.";
+
+            // Show "Scan Again" button even on error
+            const scanAgainBtn = document.getElementById("scan-again-btn");
+            if (scanAgainBtn) {
+              scanAgainBtn.style.display = "block";
+            }
+          });
+      });
+    }
+  </script>
+</body>
+
+</html>
