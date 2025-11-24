@@ -63,7 +63,9 @@ app.secret_key = os.getenv("FLASK_SECRET", "dev_secret_change_me")  # set a real
 # DB helpers & ensure tables
 # -----------------------------
 def ensure_tables():
-    conn = sqlite3.connect(DB_PATH)
+    # Ensure /var/data exists (Render free dyno fix)
+    os.makedirs("/var/data", exist_ok=True)
+    conn = sqlite3.connect(DB_PATH) 
     c = conn.cursor()
     # students table (minimal columns) - add any additional columns you already had
     c.execute("""
