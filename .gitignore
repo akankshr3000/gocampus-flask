@@ -2,6 +2,9 @@
 __pycache__/
 *.py[codz]
 *$py.class
+!students.db
+!database/students.db
+
 
 # C extensions
 *.so
@@ -58,7 +61,7 @@ cover/
 # Django stuff:
 *.log
 local_settings.py
- 
+
 # Flask stuff:
 instance/
 .webassets-cache
@@ -202,4 +205,4 @@ cython_debug/
 # Marimo
 marimo/_static/
 marimo/_lsp/
-__marimo__/ 
+__marimo__/

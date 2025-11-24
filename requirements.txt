@@ -6,5 +6,10 @@ Pillow
 pandas
 xlsxwriter
 cloudinary
+cloudinary
+cloudinary_storage 
+cloudinary.uploader
+cloudinary.api
+
 
    
