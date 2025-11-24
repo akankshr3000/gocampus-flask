@@ -94,8 +94,15 @@ def ensure_tables():
         student_id TEXT NOT NULL,
         scan_date TEXT NOT NULL,
         scan_time TEXT NOT NULL
-    )
+    ) 
     """)
+
+    # Ensure qr_url column exists
+    try:
+        c.execute("ALTER TABLE students ADD COLUMN qr_url TEXT")
+    except:
+        pass
+
     # index for scan_log
     c.execute("""
     CREATE INDEX IF NOT EXISTS idx_scan_log_student_date ON scan_log (student_id, scan_date)
