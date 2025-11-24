@@ -113,9 +113,11 @@ def generate_student_id():
     conn = get_db()
     cur = conn.cursor()
     cur.execute("""
-        SELECT MAX(CAST(SUBSTRING(student_id, 2) AS INTEGER)) 
-        FROM students
-    """)
+    DELETE FROM help_tickets
+    WHERE status = 'Resolved'
+    AND resolved_at::timestamp <= NOW() - INTERVAL '5 days'
+""")
+
     result = cur.fetchone()
     conn.close()
 
@@ -339,10 +341,10 @@ def admin_dashboard():
 
     # Auto delete resolved help tickets older than 5 days
     cur.execute("""
-        DELETE FROM help_tickets
-        WHERE status = 'Resolved'
-        AND resolved_at <= NOW() - INTERVAL '5 days'
-    """)
+    DELETE FROM help_tickets
+    WHERE status = 'Resolved'
+    AND resolved_at::timestamp <= NOW() - INTERVAL '5 days'
+""") 
     conn.commit()
 
     cur.execute("""
