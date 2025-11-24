@@ -6,4 +6,6 @@ Pillow
 pandas
 xlsxwriter
 cloudinary
+psycopg2-binary 
+
  
