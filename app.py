@@ -30,7 +30,8 @@ import cloudinary.uploader
 
 # ---------- Config ----------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "students.db")
+DB_PATH = "/var/data/students.db" 
+
 
 # Local fallback directories (useful for dev)
 QR_PATH = os.path.join(BASE_DIR, "backend_qrcodes")      # local QR backups (optional)
