@@ -13,425 +13,42 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: "Inter", "Poppins", sans-serif;
-      background: #0f172a;
-      min-height: 100vh;
-      color: #ffffff;
-    }
-
-    .header {
-      background: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1.5rem 2rem;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .header-content {
-      max-width: 1400px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .header h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      background: linear-gradient(to right, #ffffff, #a0a0a0);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .btn {
-      padding: 0.625rem 1.5rem;
-      border-radius: 10px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      border: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn-danger {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid rgba(239, 68, 68, 0.5);
-      color: #fca5a5;
-      padding: 0.75rem 1.5rem;
-      border-radius: 10px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .btn-danger:hover {
-      background: rgba(239, 68, 68, 0.3);
-      transform: translateY(-2px);
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-
-    .alert {
-      padding: 1rem 1.5rem;
-      border-radius: 12px;
-      margin-bottom: 2rem;
-      background: rgba(34, 197, 94, 0.2);
-      border: 1px solid rgba(34, 197, 94, 0.5);
-      color: #86efac;
-      animation: appear 0.5s ease-out;
-    }
-
-    @keyframes appear {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .card {
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    }
-
-    .card-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      color: #ffffff;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .form-group.full-width {
-      grid-column: 1 / -1;
-    }
-
-    .error-message {
-      color: #fca5a5;
-      font-size: 0.75rem;
-      margin-top: 0.25rem;
-      display: block;
-    }
-
-    label {
-      color: #e2e8f0;
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-      font-size: 0.9rem;
-    }
-
-    input,
-    select {
-      padding: 0.75rem 1rem;
-      background: rgba(30, 41, 59, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      color: #ffffff;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    input:focus,
-    select:focus {
-      outline: none;
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    }
-
-    input::placeholder {
-      color: #64748b;
-    }
-
-    .input-with-prefix {
-      display: flex;
-      align-items: center;
-      background: rgba(30, 41, 59, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .input-with-prefix:focus-within {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    }
-
-    .input-with-prefix .prefix {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.75rem 0.9rem;
-      background: rgba(15, 23, 42, 0.9);
-      color: #e2e8f0;
-      font-size: 0.9rem;
-      border-right: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .input-with-prefix input {
-      border: none;
-      background: transparent;
-      color: #ffffff;
-      padding: 0.75rem 0.9rem;
-      font-size: 1rem;
-      flex: 1;
-    }
-
-    .input-with-prefix input:focus {
-      outline: none;
-      border: none;
-      box-shadow: none;
-    }
-
-    .input-with-prefix input::placeholder {
-      color: #64748b;
-    }
-
-    .btn-success {
-      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-      color: white;
-      padding: 0.75rem 2rem;
-      border-radius: 10px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-success:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
-    }
-
-    .actions-bar {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin-bottom: 2rem;
-      align-items: center;
-    }
-
-    .btn-info {
-      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-      color: white;
-      padding: 0.75rem 1.5rem;
-      border-radius: 10px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn-info:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
-    }
-
-    .btn-outline {
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.5);
-      color: #86efac;
-      padding: 0.75rem 1.5rem;
-      border-radius: 10px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn-outline:hover {
-      background: rgba(34, 197, 94, 0.2);
-      transform: translateY(-2px);
-    }
-
-
-    .btn-secondary {
-      background: rgba(100, 116, 139, 0.2);
-      border: 1px solid rgba(100, 116, 139, 0.5);
-      color: #cbd5e1;
-      padding: 0.75rem 1.5rem;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(100, 116, 139, 0.3);
-      transform: translateY(-2px);
-    }
-
-    .table-container {
-      overflow-x: auto;
-      border-radius: 20px;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    thead {
-      background: rgba(30, 41, 59, 0.8);
-    }
-
-    th {
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-      color: #ffffff;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    td {
-      padding: 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      color: #e2e8f0;
-    }
-
-    tbody tr:hover {
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .badge {
-      display: inline-flex;
-      padding: 0.375rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.875rem;
-      font-weight: 600;
-    }
-
-    .badge-success {
-      background: rgba(34, 197, 94, 0.2);
-      color: #86efac;
-      border: 1px solid rgba(34, 197, 94, 0.5);
-    }
-
-    .badge-danger {
-      background: rgba(239, 68, 68, 0.2);
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.5);
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: center;
-    }
-
-    .btn-sm {
-      padding: 0.5rem 1rem;
-      font-size: 0.875rem;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-
-    .btn-warning {
-      background: rgba(234, 179, 8, 0.2);
-      border: 1px solid rgba(234, 179, 8, 0.5);
-      color: #fde047;
-    }
-
-    .btn-warning:hover {
-      background: rgba(234, 179, 8, 0.3);
-      transform: translateY(-2px);
-    }
-
-    .btn-danger-sm {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid rgba(239, 68, 68, 0.5);
-      color: #fca5a5;
-    }
-
-    .btn-danger-sm:hover {
-      background: rgba(239, 68, 68, 0.3);
-      transform: translateY(-2px);
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 3rem;
-      padding: 2rem;
-      color: #64748b;
-    }
-
-    @media (max-width: 768px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .actions-bar {
-        flex-direction: column;
-      }
-
-      .table-container {
-        overflow-x: scroll;
-      }
-    }
+    * { box-sizing: border-box; margin:0; padding:0 }
+    body { font-family: "Inter", "Poppins", sans-serif; background:#0f172a; color:#fff; min-height:100vh }
+    .header { background: rgba(15,23,42,0.8); padding:1.25rem 1.5rem; position:sticky; top:0; z-index:50; border-bottom:1px solid rgba(255,255,255,0.04) }
+    .header-content{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+    .container{max-width:1200px;margin:1.5rem auto;padding:0 1rem}
+    .card{background:rgba(15,23,42,0.6);padding:1.25rem;border-radius:12px;border:1px solid rgba(255,255,255,0.03);margin-bottom:1rem}
+    .card-title{font-size:1.25rem;font-weight:600;margin-bottom:0.75rem}
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem}
+    label{display:block;margin-bottom:0.35rem;color:#cbd5e1;font-weight:500}
+    input,select{width:100%;padding:0.6rem 0.75rem;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(30,41,59,0.6);color:#fff}
+    .actions-bar{display:flex;gap:0.75rem;align-items:center;margin:0.75rem 0}
+    .btn { padding:0.6rem 1rem;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem }
+    .btn-success{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+    .btn-outline{background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.12);color:#86efac;padding:0.6rem 0.9rem;border-radius:8px}
+    .table-container{overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,0.03);background:rgba(15,23,42,0.6)}
+    table{width:100%;border-collapse:collapse}
+    thead{background:rgba(30,41,59,0.8)}
+    th,td{padding:0.75rem 0.85rem;text-align:left;border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:middle}
+    .badge{display:inline-block;padding:0.25rem 0.6rem;border-radius:999px;font-weight:600}
+    .badge-success{background:rgba(34,197,94,0.12);color:#86efac;border:1px solid rgba(34,197,94,0.14)}
+    .badge-danger{background:rgba(239,68,68,0.08);color:#fca5a5;border:1px solid rgba(239,68,68,0.12)}
+    .photo-thumb{width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid rgba(255,255,255,0.04)}
+    .muted{color:#94a3b8;font-size:0.92rem}
+    @media(max-width:720px){.form-grid{grid-template-columns:1fr}}
   </style>
 </head>
 
 <body>
   <div class="header">
     <div class="header-content">
-      <h1>📋 GoCampus - Admin Dashboard</h1>
-      <div style="display: flex; gap: 1rem;">
-        <a href="/help_tickets" class="btn-secondary"
-          style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
-          🛠 Help Tickets
-        </a>
-        <a href="/logout" class="btn-danger" style="text-decoration: none;">Logout</a>
+      <div style="display:flex;align-items:center;gap:1rem">
+        <h1 style="font-size:1.1rem; font-weight:700;">📋 GoCampus — Admin Dashboard</h1>
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:center">
+        <a href="/help_tickets" class="btn btn-outline">🛠 Help Tickets</a>
+        <a href="/logout" class="btn" style="background:rgba(255,255,255,0.04);color:#ffdcdc;border-radius:8px;padding:0.5rem 0.9rem">Logout</a>
       </div>
     </div>
   </div>
@@ -439,91 +56,76 @@
   <div class="container">
     {% with messages = get_flashed_messages() %}
     {% if messages %}
-    <div class="alert">
+    <div class="card" style="border-left:4px solid #22c55e;">
       {% for msg in messages %}
-      {{ msg }}
+      <div style="color:#c7f0d3">{{ msg }}</div>
       {% endfor %}
     </div>
     {% endif %}
     {% endwith %}
 
-    <!-- Add Student Form -->
+    <!-- Add Student -->
     <div class="card">
-      <h2 class="card-title">➕ Add New Student</h2>
+      <div class="card-title">➕ Add New Student</div>
       <form action="/add_student" method="post" id="add-student-form" enctype="multipart/form-data">
         <div class="form-grid">
-          <div class="form-group">
+          <div>
             <label for="name">Student Name *</label>
-            <input type="text" id="name" name="name" required>
-            <span class="error-message" id="name-error"></span>
+            <input type="text" id="name" name="name" required />
           </div>
-          <div class="form-group">
-            <label for="bus_id">Bus No * (Digits only)</label>
-            <input type="text" id="bus_id" name="bus_id" pattern="[0-9]+" required>
-            <span class="error-message" id="bus_id-error"></span>
+          <div>
+            <label for="bus_id">Bus No * (digits only)</label>
+            <input type="text" id="bus_id" name="bus_id" pattern="\d+" required />
           </div>
-          <div class="form-group">
+          <div>
             <label for="semester">Semester (1-8)</label>
-            <input type="text" id="semester" name="semester" pattern="[1-8]" maxlength="1">
+            <input type="text" id="semester" name="semester" pattern="[1-8]" maxlength="1" />
           </div>
-          <div class="form-group">
+          <div>
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="Enter email" required>
+            <input type="email" id="email" name="email" />
           </div>
-          <div class="form-group">
+          <div>
             <label for="branch">Branch</label>
-            <input type="text" id="branch" name="branch">
+            <input type="text" id="branch" name="branch" />
           </div>
-          <div class="form-group">
+          <div>
             <label for="fee_paid">Fee Status</label>
-            <select id="fee_paid" name="fee_paid" required>
+            <select id="fee_paid" name="fee_paid">
               <option value="0" selected>Unpaid</option>
               <option value="1">Paid</option>
             </select>
           </div>
-          <div class="form-group" id="amount-group" style="display: none;">
-            <label for="amount_paid">Amount Paid (₹)</label>
-            <input type="number" id="amount_paid" name="amount_paid" min="15000" max="15000" step="1" pattern="^15000$"
-              placeholder="15000">
-            <span class="error-message" id="amount-error"></span>
-          </div>
-          <div class="form-group full-width">
+          <div style="grid-column:1/-1">
             <label for="parent_contact">Parent Contact (10 digits)</label>
-            <div class="input-with-prefix">
-              <span class="prefix">🇮🇳 +91</span>
-              <input type="text" id="parent_contact" name="parent_contact" pattern="^(?!([0-9])\1{9})[0-9]{10}$"
-                maxlength="10" placeholder="Enter 10-digit number">
+            <div style="display:flex;gap:0.5rem;align-items:center">
+              <div style="padding:0.5rem 0.7rem;background:rgba(255,255,255,0.03);border-radius:8px;color:#94a3b8">🇮🇳 +91</div>
+              <input type="text" id="parent_contact" name="parent_contact" pattern="^(?!([0-9])\1{9})[0-9]{10}$" maxlength="10" placeholder="Enter 10-digit number" style="flex:1" />
             </div>
-            <span class="error-message" id="phone-error"></span>
           </div>
-          <div class="form-group full-width">
-            <label for="photo">Student Photo (Passport Size) *</label>
-            <input type="file" id="photo" name="photo" accept="image/*" required>
+          <div style="grid-column:1/-1">
+            <label for="photo">Student Photo (JPG/PNG, max 3MB) *</label>
+            <input type="file" id="photo" name="photo" accept="image/jpeg,image/png" required />
           </div>
         </div>
-        <div style="text-align: right; margin-top: 1rem;">
-          <button type="submit" class="btn-success">Add Student</button>
+        <div style="text-align:right;margin-top:0.8rem">
+          <button type="submit" class="btn btn-success">Add Student</button>
         </div>
       </form>
     </div>
 
-    <!-- Quick Actions -->
     <div class="actions-bar">
-      <a href="/export_excel" class="btn-outline">
-        📊 Export Report (Excel)
-      </a>
+      <a href="/export_excel" class="btn btn-outline">📊 Export Report (Excel)</a>
     </div>
 
-    <!-- Fee Records Chart -->
+    <!-- Chart -->
     <div class="card">
-      <h2 class="card-title">📊 Fee Records Overview</h2>
-      <div style="max-width: 600px; margin: 0 auto;">
-        <canvas id="feeChart"></canvas>
-      </div>
+      <div class="card-title">📊 Fee Records Overview</div>
+      <div style="max-width:600px;margin:0 auto"><canvas id="feeChart"></canvas></div>
     </div>
 
-    <!-- Students Table -->
-    <div class="table-container">
+    <!-- Students table -->
+    <div class="table-container card" style="padding:0;">
       <table>
         <thead>
           <tr>
@@ -541,61 +143,63 @@
         <tbody>
           {% for s in students %}
           <tr>
-            <td>{{ s[1] }}</td>
+            <td style="font-weight:700">{{ s.student_id }}</td>
+
             <td>
-              {% if s[11] %}
-              <img src="{{ url_for('static', filename='student_photos/' + s[11]) }}" alt="Photo"
-                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2);">
+              {% if s.photo_filename %}
+              <img class="photo-thumb" src="{{ url_for('static', filename=('student_photos/' ~ s.photo_filename)) }}" alt="photo" />
               {% else %}
-              <div
-                style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">
-                No</div>
+              <div class="muted">No</div>
               {% endif %}
             </td>
+
             <td>
-              <div style="font-weight: 600;">{{ s[2] }}</div>
-              <div style="font-size: 0.8rem; color: #94a3b8;">{{ s[10] or '' }}</div>
+              <div style="font-weight:600">{{ s.name or 'N/A' }}</div>
+              <div class="muted">{{ s.email or '' }}</div>
             </td>
-            <td>{{ s[3] }}</td>
-            <td>{{ s[7] or 'N/A' }}</td>
-            <td>{{ s[6] or 'N/A' }}</td>
+
+            <td>{{ s.bus_id or 'N/A' }}</td>
+            <td>{{ s.branch or 'N/A' }}</td>
+            <td>{{ s.semester or 'N/A' }}</td>
+
             <td>
-              {% if s[4] == 1 %}
-              <span class="badge badge-success">Paid</span>
+              {% if s.fee_paid == 1 or s.fee_paid == '1' %}
+                <span class="badge badge-success">Paid</span>
               {% else %}
-              <span class="badge badge-danger">Unpaid</span>
+                <span class="badge badge-danger">Unpaid</span>
               {% endif %}
             </td>
+
             <td>
-              {% if s[4] == 1 %}
-              {% if s[8] and s[9] %}
-              <span style="font-size: 0.85rem; color: #86efac;">
-                ₹{{ "{:,}".format(s[8]) }}<br>
-                {{ s[9]|format_date }}
-              </span>
-              {% elif s[9] %}
-              <span style="font-size: 0.85rem; color: #86efac;">
-                {{ s[9]|format_date }}
-              </span>
-              {% else %}
-              <span style="font-size: 0.85rem; color: #94a3b8;">-</span>
-              {% endif %}
-              {% else %}
-              <span style="font-size: 0.85rem; color: #94a3b8;">-</span>
-              {% endif %}
-            </td>
-            <td>
-              <div class="action-buttons">
-                {% if s[4] == 0 %}
-                <button type="button" class="btn-sm btn-warning" onclick="showMarkPaidModal('{{ s[1] }}')">Mark
-                  Paid</button>
+              {% if (s.fee_paid == 1 or s.fee_paid == '1') %}
+                {% if s.amount_paid %}
+                  <div style="color:#86efac">₹{{ "{:,}".format(s.amount_paid) }}</div>
                 {% endif %}
-                <form action="/delete_student" method="post" style="display: inline;">
-                  <input type="hidden" name="student_id" value="{{ s[1] }}">
-                  <button type="submit" class="btn-sm btn-danger-sm">Delete</button>
+                {% if s.transaction_date %}
+                  <div class="muted">{{ s.transaction_date }}</div>
+                {% endif %}
+                {% if not s.amount_paid and not s.transaction_date %}
+                  <div class="muted">-</div>
+                {% endif %}
+              {% else %}
+                <div class="muted">-</div>
+              {% endif %}
+            </td>
+
+            <td>
+              <div style="display:flex;gap:0.5rem;align-items:center">
+                {% if not (s.fee_paid == 1 or s.fee_paid == '1') %}
+                <button class="btn" style="background:#f59e0b;color:#111;padding:0.4rem 0.6rem;border-radius:6px" onclick="showMarkPaidModal('{{ s.student_id }}')">Mark Paid</button>
+                {% endif %}
+
+                <form action="/delete_student" method="post" style="display:inline">
+                  <input type="hidden" name="student_id" value="{{ s.student_id }}">
+                  <button type="submit" class="btn" style="background:rgba(239,68,68,0.08);color:#fca5a5;padding:0.4rem 0.6rem;border-radius:6px">Delete</button>
                 </form>
+
               </div>
             </td>
+
           </tr>
           {% endfor %}
         </tbody>
@@ -603,337 +207,43 @@
     </div>
 
   </div>
-  </div>
 
-  <footer>
-    <p>© 2025 GoCampus Project</p>
-  </footer>
+  <footer style="text-align:center;padding:1.5rem 0;color:#94a3b8">© 2025 GoCampus Project</footer>
 
   <!-- Mark Paid Modal -->
-  <div id="markPaidModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: rgba(15, 23, 42, 0.95); padding: 2rem; border-radius: 20px; max-width: 400px; width: 90%;">
-      <h3 style="color: #ffffff; margin-bottom: 1rem;">Mark Student as Paid</h3>
-      <form action="/mark_paid_admin" method="post" id="markPaidForm">
-        <input type="hidden" name="student_id" id="modal_student_id">
-        <div class="form-group">
-          <label for="modal_amount_paid">Amount Paid (₹)</label>
-          <input type="number" id="modal_amount_paid" name="amount_paid" min="15000" max="15000" step="1" value="15000"
-            readonly>
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-          <button type="submit" class="btn-success" style="flex: 1;">Mark Paid</button>
-          <button type="button" class="btn-secondary" onclick="closeMarkPaidModal()" style="flex: 1;">Cancel</button>
-        </div>
+  <div id="markPaidModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:1000">
+    <div style="background:#0f172a;padding:1rem;border-radius:10px;max-width:420px;margin:auto;border:1px solid rgba(255,255,255,0.04)">
+      <h3 style="margin-bottom:0.6rem">Mark Student as Paid</h3>
+      <form id="markPaidForm" action="/mark_paid_admin" method="post">
+        <input type="hidden" name="student_id" id="modal_student_id" />
+        <div style="margin-bottom:0.5rem"><label>Amount (₹)</label><input readonly name="amount_paid" value="15000" /></div>
+        <div style="display:flex;gap:0.5rem"><button type="submit" class="btn btn-success" style="flex:1">Mark Paid</button><button type="button" class="btn" onclick="closeMarkPaidModal()" style="flex:1">Cancel</button></div>
       </form>
     </div>
   </div>
 
-  <!-- Cropper Modal -->
-  <div id="cropperModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; flex-direction: column;">
-    <div
-      style="background: #1e293b; padding: 1rem; border-radius: 10px; max-width: 90%; max-height: 90%; display: flex; flex-direction: column; gap: 1rem;">
-      <div style="max-width: 500px; max-height: 500px; overflow: hidden;">
-        <img id="cropperImage" src="" style="max-width: 100%; display: block;">
-      </div>
-      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-        <button type="button" class="btn-secondary" onclick="cancelCrop()">Cancel</button>
-        <button type="button" class="btn-success" onclick="saveCrop()">Crop & Save</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Auto-Renewal Modal -->
-  <div id="renewalModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; align-items: center; justify-content: center;">
-    <div
-      style="background: rgba(15, 23, 42, 0.95); padding: 2rem; border-radius: 20px; max-width: 500px; width: 90%; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
-      <h3 style="color: #ffffff; margin-bottom: 1rem; font-size: 1.5rem;">⚠️ Transport Validity Expiring</h3>
-      <div id="renewalContent"></div>
-    </div>
-  </div>
-
   <script>
-    // Chart.js - Fee Records Pie Chart
-    const chartData = {{ chart_data| tojson }};
+    // Chart
+    const chartData = {{ chart_data | tojson }} || {paid:0,unpaid:0};
     const ctx = document.getElementById('feeChart');
     if (ctx && chartData) {
-      const g2d = ctx.getContext('2d');
-      const paidGrad = g2d.createLinearGradient(0, 0, 0, 300);
-      paidGrad.addColorStop(0, '#36A2EB');   // sky blue
-      paidGrad.addColorStop(1, '#1E3A8A');   // deep indigo
-      const unpaidGrad = g2d.createLinearGradient(0, 0, 0, 300);
-      unpaidGrad.addColorStop(0, '#94A3B8'); // slate-300
-      unpaidGrad.addColorStop(1, '#475569'); // slate-600
-
-      new Chart(ctx, {
-        type: 'pie',
-        data: {
-          labels: ['Paid', 'Unpaid'],
-          datasets: [{
-            label: 'Fee Records',
-            data: [chartData.paid, chartData.unpaid],
-            backgroundColor: [paidGrad, unpaidGrad],
-            borderColor: '#ffffff22',
-            borderWidth: 1,
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          layout: { padding: 10 },
-          backgroundColor: 'transparent',
-          plugins: {
-            legend: {
-              position: 'right',
-              labels: {
-                color: '#cbd5e1',
-                boxWidth: 14,
-                boxHeight: 14,
-                padding: 12,
-                usePointStyle: true,
-                pointStyle: 'circle',
-                font: {
-                  family: 'Poppins, Inter, sans-serif',
-                  size: 14,
-                  weight: '500'
-                }
-              }
-            },
-            tooltip: {
-              backgroundColor: 'rgba(15,23,42,.95)',
-              titleColor: '#ffffff',
-              bodyColor: '#ffffff',
-              borderColor: '#ffffff22',
-              borderWidth: 1,
-              padding: 10,
-              callbacks: {
-                label: function (context) {
-                  let label = context.label || '';
-                  if (label) {
-                    label += ': ';
-                  }
-                  const value = context.parsed;
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                  label += value + ' (' + percentage + '%)';
-                  return label;
-                }
-              }
-            }
-          }
-        }
-      });
-      // make canvas area taller for nicer proportions
-      ctx.parentElement.style.height = '320px';
+      const g = ctx.getContext('2d');
+      const grad1 = g.createLinearGradient(0,0,0,300); grad1.addColorStop(0,'#36A2EB');grad1.addColorStop(1,'#1E3A8A');
+      const grad2 = g.createLinearGradient(0,0,0,300); grad2.addColorStop(0,'#94A3B8');grad2.addColorStop(1,'#475569');
+      new Chart(ctx, { type:'pie', data:{labels:['Paid','Unpaid'],datasets:[{data:[chartData.paid,chartData.unpaid],backgroundColor:[grad1,grad2],borderColor:'#00000000'}] }, options:{responsive:true,maintainAspectRatio:false} });
+      ctx.parentElement.style.height='280px'
     }
 
-    // Show amount field when fee status is Paid
-    document.getElementById('fee_paid').addEventListener('change', function () {
-      const amountGroup = document.getElementById('amount-group');
-      if (this.value === '1') {
-        amountGroup.style.display = 'flex';
-      } else {
-        amountGroup.style.display = 'none';
-      }
-    });
+    // form validations
+    document.getElementById('fee_paid').addEventListener('change', function(){ const g=document.getElementById('amount-group'); if(this.value==='1'){ if(g) g.style.display='block'; } else if(g) g.style.display='none';});
 
-    // Form validation
-    document.getElementById('add-student-form').addEventListener('submit', async function (e) {
-      e.preventDefault(); // Always prevent default to allow async phone check
+    // Mark paid modal helpers
+    function showMarkPaidModal(id){ document.getElementById('modal_student_id').value = id; document.getElementById('markPaidModal').style.display='flex'; }
+    function closeMarkPaidModal(){ document.getElementById('markPaidModal').style.display='none'; }
 
-      const busId = document.getElementById('bus_id').value;
-      const phone = document.getElementById('parent_contact').value;
-      const sem = document.getElementById('semester').value;
-      const feeSelect = document.getElementById('fee_paid');
-      const amountField = document.getElementById('amount_paid');
-      let hasErrors = false;
-
-      // Clear previous errors
-      document.getElementById('bus_id-error').textContent = '';
-      document.getElementById('phone-error').textContent = '';
-      const amountErrEl = document.getElementById('amount-error');
-      if (amountErrEl) amountErrEl.textContent = '';
-
-      // Validate Bus No
-      if (busId && !/^\d+$/.test(busId)) {
-        document.getElementById('bus_id-error').textContent = 'Bus No must contain only digits';
-        hasErrors = true;
-      }
-
-      // Validate Phone
-      if (phone) {
-        if (!/^\d{10}$/.test(phone)) {
-          document.getElementById('phone-error').textContent = 'Phone must be exactly 10 digits';
-          hasErrors = true;
-        } else if (/^([0-9])\1{9}$/.test(phone)) {
-          document.getElementById('phone-error').textContent = 'Phone number cannot use the same digit repeated';
-          hasErrors = true;
-        }
-      }
-
-      // Validate Semester (1-8)
-      if (sem && (!/^[1-8]$/.test(sem))) {
-        alert('Semester must be a single digit from 1 to 8');
-        hasErrors = true;
-      }
-
-      // Validate Amount when Paid
-      if (feeSelect.value === '1') {
-        if (!/^15000$/.test((amountField.value || '').toString())) {
-          if (amountErrEl) amountErrEl.textContent = 'Amount must be exactly ₹15000';
-          hasErrors = true;
-        }
-      }
-
-      if (hasErrors) {
-        return; // Stop here if validation errors
-      }
-
-      // Check for duplicate phone number (if phone is provided)
-      if (phone && /^\d{10}$/.test(phone) && !/^([0-9])\1{9}$/.test(phone)) {
-        try {
-          const response = await fetch('/check_phone', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: phone })
-          });
-
-          const data = await response.json();
-
-          if (data.status === 'warning' && data.exists) {
-            // Show confirmation dialog
-            const confirmed = confirm(data.message || '⚠️ This phone number is already registered with another student. Continue?');
-            if (!confirmed) {
-              alert('Registration cancelled.');
-              return; // Cancel registration
-            }
-            // User confirmed, proceed with form submission
-          }
-        } catch (error) {
-          console.error('Error checking phone:', error);
-          // Continue with submission if check fails
-        }
-      }
-
-      // All validations passed, submit the form
-      this.submit();
-    });
-
-    // Mark Paid Modal
-    function showMarkPaidModal(studentId) {
-      document.getElementById('modal_student_id').value = studentId;
-      document.getElementById('markPaidModal').style.display = 'flex';
-    }
-
-    function closeMarkPaidModal() {
-      document.getElementById('markPaidModal').style.display = 'none';
-      document.getElementById('modal_amount_paid').value = '';
-    }
-
-    // Close modal when clicking outside
-    document.getElementById('markPaidModal').addEventListener('click', function (e) {
-      if (e.target === this) {
-        closeMarkPaidModal();
-      }
-    });
-
-    // --- Cropper Logic ---
-    let cropper;
-    const photoInput = document.getElementById('photo');
-    const cropperModal = document.getElementById('cropperModal');
-    const cropperImage = document.getElementById('cropperImage');
-    let originalFile = null;
-
-    photoInput.addEventListener('change', function (e) {
-      const files = e.target.files;
-      if (files && files.length > 0) {
-        const file = files[0];
-
-        // Basic validation before cropping
-        if (file.size > 3 * 1024 * 1024) {
-          alert('File size exceeds 3MB limit.');
-          this.value = '';
-          return;
-        }
-        if (!['image/jpeg', 'image/png'].includes(file.type)) {
-          alert('Only JPG and PNG formats are allowed.');
-          this.value = '';
-          return;
-        }
-
-        originalFile = file;
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          cropperImage.src = e.target.result;
-          cropperModal.style.display = 'flex';
-
-          if (cropper) {
-            cropper.destroy();
-          }
-          cropper = new Cropper(cropperImage, {
-            aspectRatio: 0.8, // Portrait-ish
-            viewMode: 1,
-            autoCropArea: 1,
-          });
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    function cancelCrop() {
-      cropperModal.style.display = 'none';
-      photoInput.value = ''; // Clear input
-      if (cropper) cropper.destroy();
-    }
-
-    function saveCrop() {
-      if (cropper) {
-        cropper.getCroppedCanvas({
-          width: 400, // Resize to reasonable dimension
-          height: 500
-        }).toBlob((blob) => {
-          // Create a new file from the blob
-          const newFile = new File([blob], originalFile.name, { type: originalFile.type });
-
-          // Replace the file in the input (using DataTransfer)
-          const dataTransfer = new DataTransfer();
-          dataTransfer.items.add(newFile);
-          photoInput.files = dataTransfer.files;
-
-          cropperModal.style.display = 'none';
-          cropper.destroy();
-        }, originalFile.type);
-      }
-    }
-
-    // --- Auto-Renewal Logic ---
-    const renewalAlerts = {{ renewal_alerts| tojson }};
-    if (renewalAlerts && renewalAlerts.length > 0) {
-      const alert = renewalAlerts[0]; // Show first one for now
-      const modal = document.getElementById('renewalModal');
-      const content = document.getElementById('renewalContent');
-
-      content.innerHTML = `
-            <p style="color: #cbd5e1; margin-bottom: 1.5rem; font-size: 1.1rem;">
-                Transport validity for <strong>${alert.name}</strong> (${alert.student_id}) 
-                ${alert.is_expired ? 'has expired' : 'is expiring'} on <span style="color: #fca5a5;">${alert.valid_till}</span>.
-                <br><br>
-                Renew now for another year?
-            </p>
-            <form action="/renew_transport" method="post">
-                <input type="hidden" name="student_id" value="${alert.student_id}">
-                <div style="display: flex; gap: 1rem;">
-                    <button type="submit" class="btn-success" style="flex: 1;">Renew Now</button>
-                    <button type="button" class="btn-secondary" onclick="document.getElementById('renewalModal').style.display='none'" style="flex: 1;">Later</button>
-                </div>
-            </form>
-        `;
-      modal.style.display = 'flex';
-    }
+    // close modal when clicking outside
+    document.getElementById('markPaidModal')?.addEventListener('click', function(e){ if(e.target===this) closeMarkPaidModal();});
   </script>
 </body>
-
 </html>
+ 
