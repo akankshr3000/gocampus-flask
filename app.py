@@ -401,6 +401,19 @@ def admin_dashboard():
         renewal_alerts=renewal_alerts
     )
 
+def generate_student_id():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT MAX(CAST(SUBSTRING(student_id, 2) AS INTEGER))
+        FROM students
+    """)
+    row = cur.fetchone()
+    conn.close()
+    last_num = row[0] if row and row[0] is not None else 0
+    next_num = last_num + 1
+    return f"S{next_num:02d}"
+ 
 # ----------------------------------------------------
 # ADD STUDENT
 # ----------------------------------------------------
