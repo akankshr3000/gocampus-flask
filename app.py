@@ -100,6 +100,30 @@ def validate_phone(phone):
         return False, "Phone number must contain only digits"
     return True, ""
 
+def validate_photo(file_stream):
+    file_stream.seek(0, os.SEEK_END)
+    size = file_stream.tell()
+    file_stream.seek(0)
+    if size > 3 * 1024 * 1024:
+        return False, "File size exceeds 3MB limit."
+    try:
+        img = Image.open(file_stream)
+        img.verify()
+        file_stream.seek(0)
+        img = Image.open(file_stream)
+        if img.format not in ['JPEG', 'PNG']:
+            return False, "Only JPG and PNG formats are allowed."
+        width, height = img.size
+        if width < 300 or height < 300:
+            return False, "Image resolution must be at least 300x300 pixels."
+        aspect_ratio = width / height
+        if not (0.6 <= aspect_ratio <= 1.4):
+            return False, "Image must be a portrait or square (passport style)."
+        return True, ""
+    except Exception as e:
+        return False, f"Invalid image file: {str(e)}"
+
+ 
 def format_date(date_str):
     if not date_str:
         return ""
